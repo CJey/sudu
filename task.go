@@ -205,7 +205,7 @@ func (t *task) try_unlegacy() {
 		for name, r_value := range t.r_values {
 			if r_value.legacy {
 				rw_value := t.rw_values[name]
-				if rw_value != nil && rw_value.legacy {
+				if rw_value == nil || rw_value.legacy {
 					return
 				}
 			}

@@ -1,6 +1,7 @@
 package sudu
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -94,5 +95,48 @@ func TestSudu02(t *testing.T) {
 
 	if cntb != 2 || cntc != 2 || cntd != 4 || sd.Require("d").(int) != 2*a*3*a {
 		t.Errorf("error cnt2, %d, %d, %d", cntb, cntc, cntd)
+	}
+}
+
+func TestSudu03(t *testing.T) {
+	cache := NewCache("metadata", "xyz")
+	{
+		sd := NewSudu(cache)
+		sd.Go(func(cg *ConditionGroup) {
+			cg.Satisfy(
+				"str", "test",
+			)
+		})
+
+		sd.Go(func(cg *ConditionGroup) {
+			str := cg.Require("str").(string)
+			if str != "test" {
+				panic(fmt.Errorf("ddddddd"))
+			}
+		})
+
+		if err := sd.Wait(); err != nil {
+			fmt.Printf("fail %#v\n", err)
+		}
+	}
+	{
+		sd := NewSudu(cache)
+		sd.Go(func(cg *ConditionGroup) {
+			time.Sleep(10 * time.Millisecond)
+			cg.Satisfy(
+				"str", "test2",
+			)
+		})
+
+		sd.Go(func(cg *ConditionGroup) {
+			str := cg.Require("str").(string)
+			if str == "test" {
+				panic(fmt.Errorf("ddddddd"))
+			}
+		})
+
+		if err := sd.Wait(); err != nil {
+			t.Errorf("error cache")
+		}
 	}
 }
